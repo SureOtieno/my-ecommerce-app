@@ -8,20 +8,15 @@ exports.orders_get_all = (req, res, next) => {
     .populate("productId", "name")
     .exec()
     .then((docs) => {
-      res.json({
-        count: docs.length,
-        orders: docs.map((doc) => {
-          return {
-            _id: doc._id,
-            product: doc.productId,
-            quantity: doc.quantity,
-            request: {
-              type: "GET",
-              url: "http://localhost:3000/orders/" + doc._id,
-            },
-          };
-        }),
-      });
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 10;
+
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = page * pageSize;
+
+      const paginatedDocs = docs.slice(startIndex, endIndex);
+
+      res.json({ docs });
     })
     .catch((err) => {
       console.log(err);

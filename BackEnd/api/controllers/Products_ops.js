@@ -6,26 +6,17 @@ exports.products_get_all = (req, res) => {
     .select("name price _id description productImage request")
     .exec()
     .then((docs) => {
-      const response = {
-        //count: docs.length,
-        products: docs.map((doc) => {
-          return {
-            name: doc.name,
-            price: doc.price,
-            description: doc.description,
-            _id: doc._id,
-            image: doc.productImage,
-            request: {
-              type: "GET",
-              url: "http://localhost:3000/products/" + doc._id,
-            },
-          };
-        }),
-      };
-      res.json(response);
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 10;
+
+      const startIndex = (page - 1) * pageSize;
+      const endeIndex = page * pageSize;
+
+      const paginatedDocs = docs.slice(startIndex, endeIndex);
+      res.json(paginatedDocs);
     })
     .catch((err) => {
-      console.log(err);
+      //console.log(err);
       res.json({
         error: err,
       });
@@ -53,10 +44,10 @@ exports.products_create_new = (req, res, next) => {
       });
     });
 
-  res.json({
-    message: "Created product",
-    createdProduct: product,
-  });
+  // res.json({
+  //   message: "Created product",
+  //   createdProduct: product,
+  // });
 };
 
 exports.products_get_one = (req, res, next) => {
